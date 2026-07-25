@@ -1,0 +1,1863 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Calculate and analyze the ROI and IRR of life insurance savings plans with Thai tax deduction benefits and investment comparison.">
+    <title>Thai Savings Insurance ROI & IRR Calculator</title>
+    <!-- Google Fonts: Inter and Outfit -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <!-- Chart.js CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        /* Design Tokens & Variables */
+        :root {
+            --bg-gradient: linear-gradient(135deg, #090d1a, #0d122b, #040612);
+            --glass-bg: rgba(13, 20, 38, 0.45);
+            --glass-border: rgba(255, 255, 255, 0.06);
+            --glass-border-focus: rgba(99, 102, 241, 0.4);
+            --accent-indigo: #6366f1;
+            --accent-indigo-glow: rgba(99, 102, 241, 0.15);
+            --accent-cyan: #06b6d4;
+            --accent-cyan-glow: rgba(6, 182, 212, 0.15);
+            --accent-emerald: #10b981;
+            --accent-emerald-glow: rgba(16, 185, 129, 0.15);
+            --accent-rose: #f43f5e;
+            --accent-rose-glow: rgba(244, 63, 94, 0.15);
+            --text-primary: #f8fafc;
+            --text-secondary: #94a3b8;
+            --text-muted: #64748b;
+            --transition-smooth: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            --border-radius-sm: 8px;
+            --border-radius-md: 12px;
+            --border-radius-lg: 18px;
+            --font-display: 'Outfit', sans-serif;
+            --font-sans: 'Inter', sans-serif;
+        }
+
+        /* Base Reset */
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            outline: none;
+        }
+
+        body {
+            background: var(--bg-gradient);
+            color: var(--text-primary);
+            font-family: var(--font-sans);
+            min-height: 100vh;
+            overflow-x: hidden;
+            line-height: 1.5;
+            padding: 24px;
+        }
+
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: rgba(15, 23, 42, 0.3);
+        }
+        ::-webkit-scrollbar-thumb {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: var(--accent-indigo);
+        }
+
+        /* Glassmorphic Card Mixin */
+        .glass-card {
+            background: var(--glass-bg);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid var(--glass-border);
+            border-radius: var(--border-radius-lg);
+            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.3);
+            transition: var(--transition-smooth);
+        }
+
+        .glass-card:hover {
+            border-color: rgba(255, 255, 255, 0.1);
+            box-shadow: 0 12px 40px 0 rgba(0, 0, 0, 0.4);
+        }
+
+        /* Main App Layout */
+        .app-container {
+            max-width: 1440px;
+            margin: 0 auto;
+            display: flex;
+            flex-direction: column;
+            gap: 24px;
+        }
+
+        /* Header Style */
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 20px 24px;
+            background: rgba(13, 20, 38, 0.3);
+            border-bottom: 1px solid var(--glass-border);
+            border-radius: var(--border-radius-lg);
+        }
+
+        .header-logo {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .logo-icon {
+            width: 42px;
+            height: 42px;
+            background: linear-gradient(135deg, var(--accent-indigo), var(--accent-cyan));
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 0 20px var(--accent-indigo-glow);
+        }
+
+        .logo-icon svg {
+            width: 22px;
+            height: 22px;
+            fill: none;
+            stroke: var(--text-primary);
+            stroke-width: 2;
+        }
+
+        .header-title h1 {
+            font-family: var(--font-display);
+            font-size: 1.5rem;
+            font-weight: 700;
+            background: linear-gradient(to right, #ffffff, #94a3b8);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .header-title p {
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+        }
+
+        .header-actions {
+            display: flex;
+            gap: 12px;
+            align-items: center;
+        }
+
+        /* Dropdowns, Inputs, and Buttons */
+        .btn {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid var(--glass-border);
+            color: var(--text-primary);
+            padding: 10px 18px;
+            border-radius: var(--border-radius-sm);
+            font-family: var(--font-sans);
+            font-weight: 500;
+            font-size: 0.9rem;
+            cursor: pointer;
+            transition: var(--transition-smooth);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .btn:hover {
+            background: rgba(255, 255, 255, 0.1);
+            border-color: rgba(255, 255, 255, 0.2);
+            transform: translateY(-1px);
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, var(--accent-indigo), var(--accent-cyan));
+            border: none;
+            box-shadow: 0 4px 15px var(--accent-indigo-glow);
+        }
+
+        .btn-primary:hover {
+            background: linear-gradient(135deg, #4f46e5, #0891b2);
+            box-shadow: 0 6px 20px rgba(99, 102, 241, 0.3);
+        }
+
+        .btn-outline-indigo {
+            border-color: var(--accent-indigo);
+            color: var(--accent-indigo);
+        }
+
+        .btn-outline-indigo:hover {
+            background: var(--accent-indigo-glow);
+            border-color: var(--accent-indigo);
+            color: var(--text-primary);
+        }
+
+        /* Presets Selector */
+        .preset-badge {
+            background: rgba(99, 102, 241, 0.08);
+            border: 1px solid rgba(99, 102, 241, 0.2);
+            color: var(--text-secondary);
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: var(--transition-smooth);
+        }
+
+        .preset-badge:hover, .preset-badge.active {
+            background: var(--accent-indigo);
+            border-color: var(--accent-indigo);
+            color: #ffffff;
+            box-shadow: 0 0 12px var(--accent-indigo-glow);
+        }
+
+        /* Dashboard Grid Layout */
+        .grid-layout {
+            display: grid;
+            grid-template-columns: 380px 1fr;
+            gap: 24px;
+        }
+
+        @media (max-width: 1024px) {
+            .grid-layout {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        /* Sidebar Forms */
+        .sidebar {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .sidebar-section {
+            padding: 24px;
+        }
+
+        .section-title {
+            font-family: var(--font-display);
+            font-size: 1.1rem;
+            font-weight: 600;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            color: #ffffff;
+            border-left: 3px solid var(--accent-indigo);
+            padding-left: 10px;
+        }
+
+        .form-group {
+            margin-bottom: 18px;
+        }
+
+        .form-group:last-child {
+            margin-bottom: 0;
+        }
+
+        .form-label {
+            display: block;
+            font-size: 0.85rem;
+            font-weight: 500;
+            color: var(--text-secondary);
+            margin-bottom: 8px;
+        }
+
+        .form-input-container {
+            position: relative;
+            display: flex;
+            align-items: center;
+        }
+
+        .form-input {
+            width: 100%;
+            background: rgba(15, 23, 42, 0.6);
+            border: 1px solid var(--glass-border);
+            color: var(--text-primary);
+            padding: 11px 16px;
+            border-radius: var(--border-radius-sm);
+            font-family: var(--font-sans);
+            font-size: 0.9rem;
+            transition: var(--transition-smooth);
+        }
+
+        .form-input:focus {
+            border-color: var(--accent-indigo);
+            box-shadow: 0 0 10px var(--accent-indigo-glow);
+            background: rgba(15, 23, 42, 0.8);
+        }
+
+        .form-suffix {
+            position: absolute;
+            right: 14px;
+            font-size: 0.8rem;
+            color: var(--text-muted);
+            font-weight: 500;
+            pointer-events: none;
+        }
+
+        .form-input-with-suffix {
+            padding-right: 50px !important;
+        }
+
+        /* Toggle switches */
+        .toggle-container {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-top: 15px;
+        }
+
+        .switch {
+            position: relative;
+            display: inline-block;
+            width: 44px;
+            height: 24px;
+        }
+
+        .switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+
+        .slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: rgba(255, 255, 255, 0.1);
+            transition: .3s;
+            border-radius: 24px;
+            border: 1px solid var(--glass-border);
+        }
+
+        .slider:before {
+            position: absolute;
+            content: "";
+            height: 16px;
+            width: 16px;
+            left: 3px;
+            bottom: 3px;
+            background-color: white;
+            transition: .3s;
+            border-radius: 50%;
+        }
+
+        input:checked + .slider {
+            background: linear-gradient(135deg, var(--accent-indigo), var(--accent-cyan));
+            border-color: transparent;
+        }
+
+        input:checked + .slider:before {
+            transform: translateX(20px);
+        }
+
+        /* Main Dashboard Side */
+        .dashboard-main {
+            display: flex;
+            flex-direction: column;
+            gap: 24px;
+        }
+
+        /* Summary Cards Row */
+        .metrics-row {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 20px;
+        }
+
+        @media (max-width: 768px) {
+            .metrics-row {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .metric-card {
+            padding: 24px;
+            position: relative;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            min-height: 150px;
+        }
+
+        .metric-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 4px;
+        }
+
+        .metric-card.indigo::before { background: var(--accent-indigo); }
+        .metric-card.cyan::before { background: var(--accent-cyan); }
+        .metric-card.emerald::before { background: var(--accent-emerald); }
+        .metric-card.rose::before { background: var(--accent-rose); }
+
+        .metric-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+        }
+
+        .metric-title {
+            font-size: 0.85rem;
+            font-weight: 500;
+            color: var(--text-secondary);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .metric-value-container {
+            margin-top: 15px;
+        }
+
+        .metric-value {
+            font-family: var(--font-display);
+            font-size: 2.1rem;
+            font-weight: 700;
+            line-height: 1.1;
+        }
+
+        .metric-value.glowing-indigo { text-shadow: 0 0 15px var(--accent-indigo-glow); color: #ffffff; }
+        .metric-value.glowing-cyan { text-shadow: 0 0 15px var(--accent-cyan-glow); color: #ffffff; }
+        .metric-value.glowing-emerald { text-shadow: 0 0 15px var(--accent-emerald-glow); color: var(--accent-emerald); }
+
+        .metric-subtext {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            margin-top: 6px;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .metric-subtext-highlight {
+            color: var(--text-secondary);
+            font-weight: 500;
+        }
+
+        .metric-icon-bg {
+            background: rgba(255, 255, 255, 0.03);
+            padding: 8px;
+            border-radius: 8px;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .metric-icon-bg svg {
+            width: 20px;
+            height: 20px;
+            fill: none;
+            stroke-width: 2;
+        }
+
+        .indigo svg { stroke: var(--accent-indigo); }
+        .cyan svg { stroke: var(--accent-cyan); }
+        .emerald svg { stroke: var(--accent-emerald); }
+
+        /* Charts & Visuals Panel */
+        .chart-panel {
+            padding: 24px;
+        }
+
+        .chart-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 24px;
+            border-bottom: 1px solid var(--glass-border);
+            padding-bottom: 12px;
+        }
+
+        .chart-tabs {
+            display: flex;
+            gap: 8px;
+            background: rgba(15, 23, 42, 0.5);
+            border: 1px solid var(--glass-border);
+            padding: 4px;
+            border-radius: 8px;
+        }
+
+        .chart-tab {
+            background: transparent;
+            border: none;
+            color: var(--text-secondary);
+            font-family: var(--font-sans);
+            font-weight: 500;
+            font-size: 0.8rem;
+            padding: 6px 14px;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: var(--transition-smooth);
+        }
+
+        .chart-tab.active {
+            background: var(--accent-indigo);
+            color: #ffffff;
+            box-shadow: 0 2px 8px var(--accent-indigo-glow);
+        }
+
+        .chart-container {
+            position: relative;
+            height: 340px;
+            width: 100%;
+        }
+
+        /* Comparison Benchmarks Table */
+        .comparison-panel {
+            padding: 24px;
+        }
+
+        .comparison-table-wrapper {
+            overflow-x: auto;
+            margin-top: 15px;
+        }
+
+        .comparison-table {
+            width: 100%;
+            border-collapse: collapse;
+            text-align: left;
+            font-size: 0.9rem;
+        }
+
+        .comparison-table th {
+            color: var(--text-secondary);
+            font-weight: 500;
+            padding: 12px 16px;
+            border-bottom: 1px solid var(--glass-border);
+            background: rgba(15, 23, 42, 0.2);
+            font-size: 0.8rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .comparison-table td {
+            padding: 14px 16px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.03);
+            color: var(--text-primary);
+        }
+
+        .comparison-table tr:hover td {
+            background: rgba(255, 255, 255, 0.01);
+        }
+
+        .comparison-row-title {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-weight: 500;
+        }
+
+        .comparison-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+        }
+
+        .dot-insurance { background: var(--accent-cyan); box-shadow: 0 0 8px var(--accent-cyan); }
+        .dot-mutual { background: var(--accent-indigo); box-shadow: 0 0 8px var(--accent-indigo); }
+        .dot-ppf { background: var(--accent-emerald); box-shadow: 0 0 8px var(--accent-emerald); }
+        .dot-fd { background: #eab308; box-shadow: 0 0 8px rgba(234, 179, 8, 0.5); }
+
+        /* Expandable Cashflow Table (Accordion) */
+        .cashflow-accordion {
+            border: 1px solid var(--glass-border);
+            border-radius: var(--border-radius-lg);
+            overflow: hidden;
+            background: var(--glass-bg);
+            backdrop-filter: blur(16px);
+            transition: var(--transition-smooth);
+        }
+
+        .cashflow-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 20px 24px;
+            cursor: pointer;
+            background: rgba(13, 20, 38, 0.2);
+            transition: var(--transition-smooth);
+        }
+
+        .cashflow-header:hover {
+            background: rgba(13, 20, 38, 0.4);
+        }
+
+        .cashflow-title {
+            font-family: var(--font-display);
+            font-size: 1.1rem;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .cashflow-title-desc {
+            font-size: 0.8rem;
+            color: var(--text-secondary);
+            font-weight: 400;
+            margin-left: 10px;
+        }
+
+        .accordion-arrow {
+            width: 24px;
+            height: 24px;
+            fill: none;
+            stroke: var(--text-secondary);
+            stroke-width: 2;
+            transition: var(--transition-smooth);
+        }
+
+        .cashflow-accordion.open .accordion-arrow {
+            transform: rotate(180deg);
+            stroke: var(--accent-indigo);
+        }
+
+        .cashflow-body {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .cashflow-accordion.open .cashflow-body {
+            max-height: 600px;
+            overflow-y: auto;
+            border-top: 1px solid var(--glass-border);
+        }
+
+        .ledger-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.85rem;
+            text-align: center;
+        }
+
+        .ledger-table th {
+            color: var(--text-secondary);
+            font-weight: 500;
+            padding: 10px;
+            background: rgba(15, 23, 42, 0.3);
+            border-bottom: 1px solid var(--glass-border);
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .ledger-table td {
+            padding: 8px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.02);
+            color: var(--text-primary);
+            font-family: var(--font-sans);
+        }
+
+        .ledger-table tr:hover td {
+            background: rgba(255, 255, 255, 0.01);
+        }
+
+        .ledger-input {
+            width: 90px;
+            background: rgba(15, 23, 42, 0.5);
+            border: 1px solid var(--glass-border);
+            border-radius: 4px;
+            color: #ffffff;
+            padding: 4px 6px;
+            text-align: right;
+            font-family: var(--font-sans);
+            font-size: 0.8rem;
+            transition: var(--transition-smooth);
+        }
+
+        .ledger-input:focus {
+            border-color: var(--accent-indigo);
+            background: rgba(15, 23, 42, 0.8);
+            box-shadow: 0 0 6px var(--accent-indigo-glow);
+        }
+
+        /* Warnings & Alert Toasts */
+        .toast-container {
+            margin-top: 10px;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .alert-box {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 14px 18px;
+            border-radius: var(--border-radius-md);
+            font-size: 0.85rem;
+            font-weight: 500;
+            transition: var(--transition-smooth);
+            animation: fadeIn 0.3s ease-out;
+        }
+
+        .alert-box svg {
+            width: 18px;
+            height: 18px;
+            flex-shrink: 0;
+            fill: none;
+            stroke-width: 2;
+        }
+
+        .alert-warning {
+            background: var(--accent-rose-glow);
+            border: 1px solid rgba(244, 63, 94, 0.2);
+            color: #fda4af;
+        }
+
+        .alert-warning svg {
+            stroke: var(--accent-rose);
+        }
+
+        .alert-info {
+            background: var(--accent-cyan-glow);
+            border: 1px solid rgba(6, 182, 212, 0.2);
+            color: #a5f3fc;
+        }
+
+        .alert-info svg {
+            stroke: var(--accent-cyan);
+        }
+
+        .alert-success {
+            background: var(--accent-emerald-glow);
+            border: 1px solid rgba(16, 185, 129, 0.2);
+            color: #a7f3d0;
+        }
+
+        .alert-success svg {
+            stroke: var(--accent-emerald);
+        }
+
+        /* Fade-in Animation */
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* PDF / Print Optimization */
+        @media print {
+            body {
+                background: #ffffff !important;
+                color: #000000 !important;
+                padding: 0 !important;
+            }
+            header, .sidebar, .chart-tabs, .btn, .cashflow-header .accordion-arrow, .preset-badge {
+                display: none !important;
+            }
+            .grid-layout {
+                grid-template-columns: 1fr !important;
+            }
+            .glass-card {
+                background: #ffffff !important;
+                color: #000000 !important;
+                border: 1px solid #e2e8f0 !important;
+                box-shadow: none !important;
+                backdrop-filter: none !important;
+            }
+            .metric-value {
+                color: #000000 !important;
+                text-shadow: none !important;
+            }
+            .cashflow-body {
+                max-height: none !important;
+                overflow: visible !important;
+            }
+            .cashflow-accordion {
+                border: 1px solid #e2e8f0 !important;
+            }
+            .cashflow-accordion .cashflow-body {
+                border-top: 1px solid #e2e8f0 !important;
+            }
+            .ledger-input {
+                border: none !important;
+                background: transparent !important;
+                color: #000000 !important;
+                text-align: right;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="app-container">
+        <!-- Header -->
+        <header class="glass-card">
+            <div class="header-logo">
+                <div class="logo-icon">
+                    <svg viewBox="0 0 24 24">
+                        <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5" stroke-linecap="round" stroke-linejoin="round"/>
+                    </svg>
+                </div>
+                <div class="header-title">
+                    <h1>Thai Savings Insurance ROI & IRR Analyzer</h1>
+                    <p>Frictionless policy modeling, alternative investment comparison, and Thai tax optimization</p>
+                </div>
+            </div>
+            <div class="header-actions">
+                <button class="btn" onclick="window.print()">
+                    <svg style="width:16px; height:16px; fill:none; stroke:currentColor; stroke-width:2;" viewBox="0 0 24 24">
+                        <path d="M6 9V2h12v7M6 18H4a2 2 0 01-2-2v-5a2 2 0 012-2h16a2 2 0 012 2v5a2 2 0 01-2 2h-2m-12 0h12v4H6v-4z" stroke-linecap="round" stroke-linejoin="round"/>
+                    </svg>
+                    Print / Export PDF
+                </button>
+                <button class="btn btn-primary" onclick="resetCalculator()">Reset Engine</button>
+            </div>
+        </header>
+
+        <!-- Presets Selection Bar -->
+        <div style="display:flex; align-items:center; gap:12px; flex-wrap:wrap; padding: 0 10px;">
+            <span style="font-size:0.85rem; color:var(--text-secondary); font-weight:500;">Load Sample Policies:</span>
+            <div class="preset-badge active" id="preset-10-5" onclick="loadPreset('10-5')">Endowment 10/5 (Highly Common)</div>
+            <div class="preset-badge" id="preset-15-10" onclick="loadPreset('15-10')">Savings Plan 15/10</div>
+            <div class="preset-badge" id="preset-moneyback" onclick="loadPreset('moneyback')">Money-Back 20/7</div>
+            <div class="preset-badge" id="preset-pure-saving" onclick="loadPreset('pure-saving')">Maturity-Only 12/6</div>
+        </div>
+
+        <!-- Main Layout Grid -->
+        <div class="grid-layout">
+            
+            <!-- Left Panel: Sidebar Inputs -->
+            <aside class="sidebar">
+                
+                <!-- Section 1: Policy Parameters -->
+                <div class="glass-card sidebar-section">
+                    <h2 class="section-title">
+                        Policy Parameters
+                        <svg style="width:18px; height:18px; fill:none; stroke:var(--accent-indigo); stroke-width:2" viewBox="0 0 24 24">
+                            <path d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" stroke-linecap="round" stroke-linejoin="round"/>
+                        </svg>
+                    </h2>
+                    <div class="form-group">
+                        <label class="form-label" for="annual-premium">Annual Premium Amount</label>
+                        <div class="form-input-container">
+                            <input type="number" id="annual-premium" class="form-input form-input-with-suffix" value="100000" step="5000" min="0">
+                            <span class="form-suffix">THB</span>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label" for="premium-term">Premium Pay Term (Years)</label>
+                        <div class="form-input-container">
+                            <input type="number" id="premium-term" class="form-input form-input-with-suffix" value="5" min="1" max="50">
+                            <span class="form-suffix">Yrs</span>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label" for="policy-term">Total Policy Term (Years)</label>
+                        <div class="form-input-container">
+                            <input type="number" id="policy-term" class="form-input form-input-with-suffix" value="10" min="1" max="100">
+                            <span class="form-suffix">Yrs</span>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label" for="maturity-lump-sum">Maturity Lump-Sum Benefit</label>
+                        <div class="form-input-container">
+                            <input type="number" id="maturity-lump-sum" class="form-input form-input-with-suffix" value="500000" step="10000" min="0">
+                            <span class="form-suffix">THB</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Section 2: Cashbacks & Dividends -->
+                <div class="glass-card sidebar-section">
+                    <h2 class="section-title">
+                        Periodic Cashbacks
+                        <svg style="width:18px; height:18px; fill:none; stroke:var(--accent-cyan); stroke-width:2" viewBox="0 0 24 24">
+                            <path d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1c-1.11 0-2.08-.402-2.599-1M12 8V7m0 9v1m0-1c1.11 0 2.08-.402 2.599-1M12 16V7" stroke-linecap="round" stroke-linejoin="round"/>
+                        </svg>
+                    </h2>
+                    <div class="form-group">
+                        <label class="form-label" for="cashback-rate">Annual Cashback Rate (% of Premium)</label>
+                        <div class="form-input-container">
+                            <input type="number" id="cashback-rate" class="form-input form-input-with-suffix" value="2" min="0" max="100">
+                            <span class="form-suffix">% / yr</span>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label" for="cashback-start">Cashback Start Year</label>
+                        <div class="form-input-container">
+                            <input type="number" id="cashback-start" class="form-input form-input-with-suffix" value="1" min="1" max="100">
+                            <span class="form-suffix">Yr</span>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label" for="cashback-end">Cashback End Year</label>
+                        <div class="form-input-container">
+                            <input type="number" id="cashback-end" class="form-input form-input-with-suffix" value="9" min="1" max="100">
+                            <span class="form-suffix">Yr</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Section 3: Thai Tax Profile -->
+                <div class="glass-card sidebar-section">
+                    <h2 class="section-title">
+                        Thai Tax Profile
+                        <svg style="width:18px; height:18px; fill:none; stroke:var(--accent-emerald); stroke-width:2" viewBox="0 0 24 24">
+                            <path d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" stroke-linecap="round" stroke-linejoin="round"/>
+                        </svg>
+                    </h2>
+                    <div class="form-group">
+                        <label class="form-label" for="tax-bracket">Your Marginal Income Tax Bracket</label>
+                        <select id="tax-bracket" class="form-input" style="background-image:none;">
+                            <option value="0">0% (Income ≤ 150k THB)</option>
+                            <option value="0.05">5% (Income 150k - 300k THB)</option>
+                            <option value="0.10">10% (Income 300k - 500k THB)</option>
+                            <option value="0.15">15% (Income 500k - 750k THB)</option>
+                            <option value="0.20" selected>20% (Income 750k - 1M THB)</option>
+                            <option value="0.25">25% (Income 1M - 2M THB)</option>
+                            <option value="0.30">30% (Income 2M - 5M THB)</option>
+                            <option value="0.35">35% (Income > 5M THB)</option>
+                        </select>
+                    </div>
+                    <div class="toggle-container">
+                        <span class="form-label" style="margin-bottom:0; max-width:80%;">Claim Life Insurance Tax Deduction (Max 100k THB)</span>
+                        <label class="switch">
+                            <input type="checkbox" id="claim-tax" checked>
+                            <span class="slider"></span>
+                        </label>
+                    </div>
+                </div>
+
+                <!-- Section 4: Comparison Alternatives -->
+                <div class="glass-card sidebar-section">
+                    <h2 class="section-title">
+                        Alternative Benchmark Rates
+                        <svg style="width:18px; height:18px; fill:none; stroke:#eab308; stroke-width:2" viewBox="0 0 24 24">
+                            <path d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" stroke-linecap="round" stroke-linejoin="round"/>
+                        </svg>
+                    </h2>
+                    <div class="form-group">
+                        <label class="form-label" for="mutual-fund-rate">Mutual Fund Return Rate</label>
+                        <div class="form-input-container">
+                            <input type="number" id="mutual-fund-rate" class="form-input form-input-with-suffix" value="10" step="0.5" min="0">
+                            <span class="form-suffix">% / yr</span>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label" for="safe-bond-rate">Government / PPF Rate</label>
+                        <div class="form-input-container">
+                            <input type="number" id="safe-bond-rate" class="form-input form-input-with-suffix" value="5.5" step="0.1" min="0">
+                            <span class="form-suffix">% / yr</span>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label" for="fd-rate">Fixed Deposit Rate (Pre-tax)</label>
+                        <div class="form-input-container">
+                            <input type="number" id="fd-rate" class="form-input form-input-with-suffix" value="4.0" step="0.1" min="0">
+                            <span class="form-suffix">% / yr</span>
+                        </div>
+                    </div>
+                </div>
+
+            </aside>
+
+            <!-- Right Panel: Dashboard Charts and Outputs -->
+            <main class="dashboard-main">
+                
+                <!-- Audit Warnings Center -->
+                <div class="toast-container" id="warnings-center">
+                    <!-- Warnings dynamically rendered here -->
+                </div>
+
+                <!-- Key Financial Metrics Card Grid -->
+                <div class="metrics-row">
+                    
+                    <!-- Post-Tax IRR (Premium indicator) -->
+                    <div class="glass-card metric-card indigo">
+                        <div class="metric-header">
+                            <span class="metric-title">Post-Tax IRR (Annualized)</span>
+                            <div class="metric-icon-bg">
+                                <svg viewBox="0 0 24 24"><path d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/></svg>
+                            </div>
+                        </div>
+                        <div class="metric-value-container">
+                            <div class="metric-value glowing-indigo" id="metric-irr">0.00%</div>
+                            <div class="metric-subtext">
+                                Pre-Tax IRR: <span id="pre-tax-irr" class="metric-subtext-highlight">0.00%</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Net Capital Yield -->
+                    <div class="glass-card metric-card cyan">
+                        <div class="metric-header">
+                            <span class="metric-title">Total Net Earnings</span>
+                            <div class="metric-icon-bg">
+                                <svg viewBox="0 0 24 24"><path d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1c-1.11 0-2.08-.402-2.599-1M12 8V7m0 9v1m0-1c1.11 0 2.08-.402 2.599-1M12 16V7" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                            </div>
+                        </div>
+                        <div class="metric-value-container">
+                            <div class="metric-value glowing-cyan" id="metric-earnings">0 THB</div>
+                            <div class="metric-subtext">
+                                Net Paid: <span id="metric-paid" class="metric-subtext-highlight">0 THB</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Wealth Deficit / Gap -->
+                    <div class="glass-card metric-card emerald" id="wealth-gap-card">
+                        <div class="metric-header">
+                            <span class="metric-title">Alternative Wealth Gap</span>
+                            <div class="metric-icon-bg">
+                                <svg viewBox="0 0 24 24"><path d="M11 3.055A9.001 9.001 0 1020.945 13H11V3.055z"/><path d="M20.488 9H15V3.512A9.025 9.025 0 0120.488 9z"/></svg>
+                            </div>
+                        </div>
+                        <div class="metric-value-container">
+                            <div class="metric-value glowing-emerald" id="metric-gap">0 THB</div>
+                            <div class="metric-subtext">
+                                Lost Opportunity vs. Mutual Fund SIP
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+
+                <!-- Charts Display Deck -->
+                <div class="glass-card chart-panel">
+                    <div class="chart-header">
+                        <h3 style="font-family:var(--font-display); font-weight:600; font-size:1.05rem;">Analysis Visualizations</h3>
+                        <div class="chart-tabs">
+                            <button class="chart-tab active" id="tab-wealth" onclick="switchChart('wealth')">Cumulative Wealth</button>
+                            <button class="chart-tab" id="tab-cashflow" onclick="switchChart('cashflow')">Annual Cash Flows</button>
+                        </div>
+                    </div>
+                    <div class="chart-container">
+                        <canvas id="analysisChart"></canvas>
+                    </div>
+                </div>
+
+                <!-- Side-by-Side Comparison Matrix -->
+                <div class="glass-card comparison-panel">
+                    <h3 style="font-family:var(--font-display); font-weight:600; font-size:1.05rem; margin-bottom:12px;">Financial Comparison Matrix</h3>
+                    <p style="font-size:0.8rem; color:var(--text-secondary); margin-bottom:15px;">How the insurance policy compares side-by-side with other instruments investing the same net tax-adjusted annual capital.</p>
+                    <div class="comparison-table-wrapper">
+                        <table class="comparison-table">
+                            <thead>
+                                <tr>
+                                    <th>Investment Vehicle</th>
+                                    <th>Annualized Yield</th>
+                                    <th>Total Invested</th>
+                                    <th>Survival Cashbacks</th>
+                                    <th>Maturity / Final Value</th>
+                                    <th>Post-Tax IRR</th>
+                                </tr>
+                            </thead>
+                            <tbody id="comparison-body">
+                                <!-- Computed values inserted dynamically -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- Expandable Custom Ledger Ledger (Accordion Pattern) -->
+                <div class="cashflow-accordion" id="accordion">
+                    <div class="cashflow-header" onclick="toggleAccordion()">
+                        <div class="cashflow-title">
+                            📅 Expand Manual Cashflow Timeline Editor
+                            <span class="cashflow-title-desc">Click to modify year-by-year cash flows manually</span>
+                        </div>
+                        <svg class="accordion-arrow" viewBox="0 0 24 24">
+                            <path d="M19 9l-7 7-7-7" stroke-linecap="round" stroke-linejoin="round"/>
+                        </svg>
+                    </div>
+                    <div class="cashflow-body">
+                        <div style="padding:15px; border-bottom:1px solid var(--glass-border); background:rgba(255,255,255,0.01); display:flex; justify-content:space-between; align-items:center;">
+                            <span style="font-size:0.8rem; color:var(--text-secondary);">Editable fields are marked with border. Recalculation triggers instantly upon clicking out of any cell.</span>
+                            <button class="btn" style="padding: 5px 12px; font-size:0.75rem;" onclick="regenerateStandardTimeline()">Restore Auto Timeline</button>
+                        </div>
+                        <div style="overflow-x:auto;">
+                            <table class="ledger-table">
+                                <thead>
+                                    <tr>
+                                        <th>Year</th>
+                                        <th>Age Estimate</th>
+                                        <th>Base Premium</th>
+                                        <th>Tax Savings</th>
+                                        <th>Net Premium (Outflow)</th>
+                                        <th>Survival Benefit (Inflow)</th>
+                                        <th>Maturity Benefit (Inflow)</th>
+                                        <th>Net Cash Flow</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="ledger-body">
+                                    <!-- Dynamic rows from script -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+            </main>
+
+        </div>
+    </div>
+
+    <!-- Application Script Engine -->
+    <script>
+        // Preset configurations
+        const PRESETS = {
+            '10-5': {
+                premium: 100000,
+                payTerm: 5,
+                policyTerm: 10,
+                maturity: 500000,
+                cashbackRate: 2,
+                cashbackStart: 1,
+                cashbackEnd: 9
+            },
+            '15-10': {
+                premium: 80000,
+                payTerm: 10,
+                policyTerm: 15,
+                maturity: 850000,
+                cashbackRate: 3,
+                cashbackStart: 1,
+                cashbackEnd: 14
+            },
+            'moneyback': {
+                premium: 120000,
+                payTerm: 7,
+                policyTerm: 20,
+                maturity: 700000,
+                cashbackRate: 5,
+                cashbackStart: 1,
+                cashbackEnd: 19
+            },
+            'pure-saving': {
+                premium: 150000,
+                payTerm: 6,
+                policyTerm: 12,
+                maturity: 1100000,
+                cashbackRate: 0,
+                cashbackStart: 1,
+                cashbackEnd: 11
+            }
+        };
+
+        // Application State
+        let state = {
+            annualPremium: 100000,
+            premiumPayTerm: 5,
+            policyTerm: 10,
+            maturityLumpSum: 500000,
+            cashbackRate: 2,
+            cashbackStart: 1,
+            cashbackEnd: 9,
+            marginalTaxRate: 0.20,
+            claimTaxDeduction: true,
+            altMutualFundRate: 0.10,
+            altSafeBondRate: 0.055,
+            altFdRate: 0.040,
+            activeChartTab: 'wealth', // 'wealth' or 'cashflow'
+            
+            // Custom Timeline Ledger Data (Primary source of truth for cashflows)
+            timeline: []
+        };
+
+        let activeChart = null;
+
+        // On Load Initializer
+        window.addEventListener('DOMContentLoaded', () => {
+            loadPreset('10-5');
+            setupInputListeners();
+        });
+
+        // Load Preset Policy Configuration
+        function loadPreset(presetKey) {
+            const config = PRESETS[presetKey];
+            if (!config) return;
+
+            // Update DOM inputs
+            document.getElementById('annual-premium').value = config.premium;
+            document.getElementById('premium-term').value = config.payTerm;
+            document.getElementById('policy-term').value = config.policyTerm;
+            document.getElementById('maturity-lump-sum').value = config.maturity;
+            document.getElementById('cashback-rate').value = config.cashbackRate;
+            document.getElementById('cashback-start').value = config.cashbackStart;
+            document.getElementById('cashback-end').value = config.cashbackEnd;
+
+            // Highlight Badge
+            document.querySelectorAll('.preset-badge').forEach(badge => badge.classList.remove('active'));
+            const activeBadge = document.getElementById(`preset-${presetKey}`);
+            if (activeBadge) activeBadge.classList.add('active');
+
+            // Sync values to State and run Auto Cashflow Generator
+            pullInputsToState();
+            regenerateStandardTimeline();
+        }
+
+        // Gather Inputs into State and run model updates
+        function pullInputsToState() {
+            state.annualPremium = parseFloat(document.getElementById('annual-premium').value) || 0;
+            state.premiumPayTerm = parseInt(document.getElementById('premium-term').value) || 1;
+            state.policyTerm = parseInt(document.getElementById('policy-term').value) || 1;
+            state.maturityLumpSum = parseFloat(document.getElementById('maturity-lump-sum').value) || 0;
+            state.cashbackRate = parseFloat(document.getElementById('cashback-rate').value) || 0;
+            state.cashbackStart = parseInt(document.getElementById('cashback-start').value) || 1;
+            state.cashbackEnd = parseInt(document.getElementById('cashback-end').value) || 1;
+            state.marginalTaxRate = parseFloat(document.getElementById('tax-bracket').value) || 0;
+            state.claimTaxDeduction = document.getElementById('claim-tax').checked;
+            state.altMutualFundRate = (parseFloat(document.getElementById('mutual-fund-rate').value) || 0) / 100;
+            state.altSafeBondRate = (parseFloat(document.getElementById('safe-bond-rate').value) || 0) / 100;
+            state.altFdRate = (parseFloat(document.getElementById('fd-rate').value) || 0) / 100;
+        }
+
+        // Setup input event listeners to recalculate dynamically on user changes
+        function setupInputListeners() {
+            const inputIds = [
+                'annual-premium', 'premium-term', 'policy-term', 'maturity-lump-sum',
+                'cashback-rate', 'cashback-start', 'cashback-end', 'tax-bracket',
+                'mutual-fund-rate', 'safe-bond-rate', 'fd-rate'
+            ];
+            inputIds.forEach(id => {
+                document.getElementById(id).addEventListener('change', () => {
+                    pullInputsToState();
+                    regenerateStandardTimeline();
+                    // Deactivate general preset badges if custom inputs deviate from preset values
+                    document.querySelectorAll('.preset-badge').forEach(badge => badge.classList.remove('active'));
+                });
+            });
+
+            document.getElementById('claim-tax').addEventListener('change', () => {
+                pullInputsToState();
+                regenerateStandardTimeline();
+            });
+        }
+
+        // Expand or Collapse Manual Ledger Table
+        function toggleAccordion() {
+            const accordion = document.getElementById('accordion');
+            accordion.classList.toggle('open');
+        }
+
+        // Standard Auto-timeline generator based on standard sidebar values
+        function regenerateStandardTimeline() {
+            state.timeline = [];
+            
+            // Build list year-by-year
+            for (let year = 1; year <= state.policyTerm; year++) {
+                // Base premium paid
+                let premium = (year <= state.premiumPayTerm) ? state.annualPremium : 0;
+                
+                // Cashback (Survival Benefit)
+                let cashback = 0;
+                if (year >= state.cashbackStart && year <= state.cashbackEnd) {
+                    cashback = state.annualPremium * (state.cashbackRate / 100);
+                }
+                
+                // Maturity benefit
+                let maturity = (year === state.policyTerm) ? state.maturityLumpSum : 0;
+                
+                // Tax Savings (Apply Thai rule: Max 100,000 THB annual premium is deductible, policy term must be >= 10 yrs)
+                let taxSavings = 0;
+                if (state.claimTaxDeduction && state.policyTerm >= 10 && premium > 0) {
+                    taxSavings = Math.min(premium, 100000) * state.marginalTaxRate;
+                }
+
+                state.timeline.push({
+                    year: year,
+                    premium: premium,
+                    taxSavings: taxSavings,
+                    cashback: cashback,
+                    maturity: maturity
+                });
+            }
+
+            renderTimelineLedger();
+            evaluateCalculationsAndCharts();
+        }
+
+        // Render manual timeline inputs into table DOM
+        function renderTimelineLedger() {
+            const ledgerBody = document.getElementById('ledger-body');
+            ledgerBody.innerHTML = '';
+
+            state.timeline.forEach((row, idx) => {
+                const tr = document.createElement('tr');
+                
+                // Computed values
+                const netPremium = row.premium - row.taxSavings;
+                const netFlow = (row.cashback + row.maturity) - netPremium;
+                const formattedFlow = netFlow >= 0 ? `+${formatNumber(netFlow)}` : `-${formatNumber(Math.abs(netFlow))}`;
+                const flowColor = netFlow >= 0 ? 'color: var(--accent-emerald)' : 'color: var(--accent-rose)';
+
+                tr.innerHTML = `
+                    <td><strong>Yr ${row.year}</strong></td>
+                    <td>Age ${30 + row.year}</td>
+                    <td>
+                        <input type="number" class="ledger-input" value="${row.premium}" onchange="updateCustomCell(${idx}, 'premium', this.value)">
+                    </td>
+                    <td id="tax-saved-cell-${idx}">${formatNumber(row.taxSavings)}</td>
+                    <td id="net-premium-cell-${idx}" style="font-weight:500;">${formatNumber(netPremium)}</td>
+                    <td>
+                        <input type="number" class="ledger-input" style="border-color: rgba(6, 182, 212, 0.2);" value="${row.cashback}" onchange="updateCustomCell(${idx}, 'cashback', this.value)">
+                    </td>
+                    <td>
+                        <input type="number" class="ledger-input" style="border-color: rgba(16, 185, 129, 0.2);" value="${row.maturity}" onchange="updateCustomCell(${idx}, 'maturity', this.value)">
+                    </td>
+                    <td id="net-flow-cell-${idx}" style="${flowColor}; font-weight:600;">${formattedFlow}</td>
+                `;
+                ledgerBody.appendChild(tr);
+            });
+        }
+
+        // Handle single element changes inside custom cashflow table
+        function updateCustomCell(index, field, value) {
+            const valNum = parseFloat(value) || 0;
+            state.timeline[index][field] = valNum;
+
+            // Recalculate tax savings for that specific row based on Thai Tax rule
+            if (field === 'premium') {
+                let premium = valNum;
+                let taxSavings = 0;
+                if (state.claimTaxDeduction && state.policyTerm >= 10 && premium > 0) {
+                    taxSavings = Math.min(premium, 100000) * state.marginalTaxRate;
+                }
+                state.timeline[index].taxSavings = taxSavings;
+            }
+
+            // Sync visual text instantly inside the row without full redrawing
+            const row = state.timeline[index];
+            const netPremium = row.premium - row.taxSavings;
+            const netFlow = (row.cashback + row.maturity) - netPremium;
+            const formattedFlow = netFlow >= 0 ? `+${formatNumber(netFlow)}` : `-${formatNumber(Math.abs(netFlow))}`;
+            
+            document.getElementById(`tax-saved-cell-${index}`).innerText = formatNumber(row.taxSavings);
+            document.getElementById(`net-premium-cell-${index}`).innerText = formatNumber(netPremium);
+            
+            const netFlowCell = document.getElementById(`net-flow-cell-${index}`);
+            netFlowCell.innerText = formattedFlow;
+            netFlowCell.style.color = netFlow >= 0 ? 'var(--accent-emerald)' : 'var(--accent-rose)';
+
+            // Trigger full recalculations of dashboard outputs & charts
+            evaluateCalculationsAndCharts();
+        }
+
+        // Reset Calculator to zero values
+        function resetCalculator() {
+            document.getElementById('annual-premium').value = 0;
+            document.getElementById('premium-term').value = 5;
+            document.getElementById('policy-term').value = 10;
+            document.getElementById('maturity-lump-sum').value = 0;
+            document.getElementById('cashback-rate').value = 0;
+            document.getElementById('cashback-start').value = 1;
+            document.getElementById('cashback-end').value = 1;
+            document.getElementById('claim-tax').checked = false;
+
+            pullInputsToState();
+            regenerateStandardTimeline();
+        }
+
+        // Calculate and Draw everything!
+        function evaluateCalculationsAndCharts() {
+            const cashflowsPreTax = Array(state.policyTerm + 1).fill(0);
+            const cashflowsPostTax = Array(state.policyTerm + 1).fill(0);
+            
+            let totalPremiumsBase = 0;
+            let totalPremiumsNet = 0;
+            let totalSurvivalBenefits = 0;
+            let totalMaturityInflows = 0;
+            let totalTaxSaved = 0;
+
+            // Accumulate financial details from timeline source of truth
+            state.timeline.forEach((row, idx) => {
+                let yr = row.year;
+                totalPremiumsBase += row.premium;
+                totalPremiumsNet += (row.premium - row.taxSavings);
+                totalSurvivalBenefits += row.cashback;
+                totalMaturityInflows += row.maturity;
+                totalTaxSaved += row.taxSavings;
+
+                // Pre-tax flows: - premium + cashback + maturity
+                cashflowsPreTax[yr] = (row.cashback + row.maturity) - row.premium;
+                // Post-tax flows: - net premium (premium - taxSavings) + cashback + maturity
+                cashflowsPostTax[yr] = (row.cashback + row.maturity) - (row.premium - row.taxSavings);
+            });
+
+            // Calculate IRR (Internal Rate of Return)
+            const irrPreTax = calculateIRR(cashflowsPreTax);
+            const irrPostTax = calculateIRR(cashflowsPostTax);
+
+            // Audit & Warnings Trigger (Thai rules validation)
+            renderWarningsCenter(totalPremiumsBase, totalSurvivalBenefits);
+
+            // Populate summary metrics cards
+            const totalCashInflow = totalSurvivalBenefits + totalMaturityInflows;
+            const netEarnings = totalCashInflow - totalPremiumsNet;
+
+            document.getElementById('metric-irr').innerText = irrPostTax !== null ? `${(irrPostTax * 100).toFixed(2)}%` : 'N/A';
+            document.getElementById('pre-tax-irr').innerText = irrPreTax !== null ? `${(irrPreTax * 100).toFixed(2)}%` : 'N/A';
+            
+            document.getElementById('metric-earnings').innerText = `${formatNumber(netEarnings)} THB`;
+            document.getElementById('metric-paid').innerText = `${formatNumber(totalPremiumsNet)} THB`;
+
+            // Modeling Alternative growth scenarios
+            const comparisonOutputs = calculateComparisons(totalPremiumsNet, totalSurvivalBenefits, totalMaturityInflows, irrPostTax);
+            
+            // Build Comparison Matrix table
+            renderComparisonTable(comparisonOutputs);
+
+            // Calculate Mutual Fund Gap card
+            const mfMaturity = comparisonOutputs.mutualFund.maturity;
+            const insMaturity = totalMaturityInflows;
+            const wealthGapValue = mfMaturity - insMaturity;
+
+            const wealthGapCard = document.getElementById('wealth-gap-card');
+            const metricGap = document.getElementById('metric-gap');
+            if (wealthGapValue > 0) {
+                metricGap.innerText = `${formatNumber(wealthGapValue)} THB`;
+                metricGap.className = "metric-value glowing-emerald";
+                wealthGapCard.className = "glass-card metric-card emerald";
+            } else {
+                metricGap.innerText = `${formatNumber(Math.abs(wealthGapValue))} THB`;
+                metricGap.className = "metric-value";
+                wealthGapCard.className = "glass-card metric-card rose";
+                metricGap.style.color = "var(--accent-rose)";
+            }
+
+            // Draw current active chart
+            renderChart(comparisonOutputs);
+        }
+
+        // Render Alerts inside Warnings Panel
+        function renderWarningsCenter(totalPremium, totalCashback) {
+            const warningsCenter = document.getElementById('warnings-center');
+            warningsCenter.innerHTML = '';
+
+            let hasWarnings = false;
+
+            // Gate 1: Thai term constraint
+            if (state.policyTerm < 10) {
+                const box = document.createElement('div');
+                box.className = 'alert-box alert-warning';
+                box.innerHTML = `
+                    <svg viewBox="0 0 24 24"><path d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                    <div>
+                        <strong>Ineligible for Tax Deductions:</strong> Thai Personal Income Tax regulations require a policy term of at least <strong>10 Years</strong>. Current term is ${state.policyTerm} years.
+                    </div>
+                `;
+                warningsCenter.appendChild(box);
+                hasWarnings = true;
+            }
+
+            // Gate 2: Thai 20% Cashback violation
+            // Under Thai law, if the cashback benefit exceeds 20% of premium, the policy is disqualified.
+            let exceededCashback = false;
+            state.timeline.forEach(row => {
+                if (row.premium > 0 && row.cashback > (row.premium * 0.20)) {
+                    exceededCashback = true;
+                }
+            });
+
+            if (exceededCashback) {
+                const box = document.createElement('div');
+                box.className = 'alert-box alert-warning';
+                box.innerHTML = `
+                    <svg viewBox="0 0 24 24"><path d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                    <div>
+                        <strong>Disqualified for Tax Deductions:</strong> Annual cashback returns exceed <strong>20% of the annual premium</strong>. Under Thai rules, this policy structure loses tax deduction eligibility.
+                    </div>
+                `;
+                warningsCenter.appendChild(box);
+                hasWarnings = true;
+            }
+
+            // Gate 3: Informational success status
+            if (!hasWarnings && state.claimTaxDeduction && totalPremium > 0) {
+                const box = document.createElement('div');
+                box.className = 'alert-box alert-success';
+                box.innerHTML = `
+                    <svg viewBox="0 0 24 24"><path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                    <div>
+                        <strong>Qualified Tax Structure:</strong> Your policy meets all Thai Revenue Department conditions (≥ 10-Yr term, ≤ 20% cashback rules). Estimated Tax Saving: <strong>${formatNumber(calculateTaxBenefitSummary())} THB</strong>.
+                    </div>
+                `;
+                warningsCenter.appendChild(box);
+            }
+        }
+
+        // Calculate summary of total tax saved over the term
+        function calculateTaxBenefitSummary() {
+            let total = 0;
+            state.timeline.forEach(row => {
+                total += row.taxSavings;
+            });
+            return total;
+        }
+
+        // Excel-grade IRR solver (Bisection and Secant Method Hybrid)
+        function calculateIRR(cashflows) {
+            let maxIterations = 1000;
+            let precision = 1e-7;
+            
+            function npv(rate) {
+                let sum = 0;
+                for (let i = 0; i < cashflows.length; i++) {
+                    sum += cashflows[i] / Math.pow(1 + rate, i);
+                }
+                return sum;
+            }
+            
+            let positive = cashflows.filter(v => v > 0).length;
+            let negative = cashflows.filter(v => v < 0).length;
+            if (positive === 0 || negative === 0) return null; // Unsolvable mathematically
+
+            // Secant Method setup
+            let x0 = 0.05; 
+            let x1 = 0.15;
+            for (let i = 0; i < maxIterations; i++) {
+                let f0 = npv(x0);
+                let f1 = npv(x1);
+                if (Math.abs(f1 - f0) < 1e-12) break;
+                
+                let x_next = x1 - f1 * (x1 - x0) / (f1 - f0);
+                if (Math.abs(x_next - x1) < precision) {
+                    return x_next;
+                }
+                x0 = x1;
+                x1 = x_next;
+                if (x_next > 8.0 || x_next < -0.99) {
+                    break; // Escape divergent Secant runs
+                }
+            }
+            
+            // Fallback: Safe Bisection search
+            let low = -0.99;
+            let high = 8.0;
+            for (let i = 0; i < 150; i++) {
+                let mid = (low + high) / 2;
+                let f_mid = npv(mid);
+                if (Math.abs(f_mid) < precision) return mid;
+                
+                if (npv(low) * f_mid < 0) {
+                    high = mid;
+                } else {
+                    low = mid;
+                }
+            }
+            return null;
+        }
+
+        // Simulate alternative compounding pathways
+        // We ensure a perfectly fair comparison by feeding the EXACT net outflows/inflows into alternative accounts
+        function calculateComparisons(totalPremiumNet, totalCashback, totalMaturity, irrInsurance) {
+            const years = state.policyTerm;
+            
+            // Portfolios year-by-year cash tracks
+            let mfTrack = Array(years + 1).fill(0);
+            let bondTrack = Array(years + 1).fill(0);
+            let fdTrack = Array(years + 1).fill(0);
+            let insTrack = Array(years + 1).fill(0);
+
+            // Accumulators
+            let mfBal = 0;
+            let bondBal = 0;
+            let fdBal = 0;
+            let insBal = 0;
+
+            // Apply Thai 15% withholding tax deduction on FD interest
+            const netFdRate = state.altFdRate * (1 - 0.15);
+
+            for (let yr = 1; yr <= years; yr++) {
+                const row = state.timeline[yr - 1];
+                const netPremiumPaid = row.premium - row.taxSavings;
+                const cashbackRec = row.cashback;
+
+                // --- Alternative Investments Simulators ---
+                // If user pays premium (outflow), they deposit it. If they receive cashback (inflow), they withdraw it.
+                // This tracks exact opportunities side-by-side.
+                
+                // 1. Mutual Funds
+                mfBal = (mfBal * (1 + state.altMutualFundRate)) + netPremiumPaid - cashbackRec;
+                mfTrack[yr] = Math.max(0, mfBal);
+
+                // 2. Safe Government Bond
+                bondBal = (bondBal * (1 + state.altSafeBondRate)) + netPremiumPaid - cashbackRec;
+                bondTrack[yr] = Math.max(0, bondBal);
+
+                // 3. Fixed Deposit
+                fdBal = (fdBal * (1 + netFdRate)) + netPremiumPaid - cashbackRec;
+                fdTrack[yr] = Math.max(0, fdBal);
+
+                // --- Insurance Cumulative Asset Estimation (Approximated for line charts) ---
+                insBal = (insBal * (1 + (irrInsurance || 0.025))) + netPremiumPaid - cashbackRec;
+                insTrack[yr] = Math.max(0, insBal);
+            }
+
+            return {
+                mutualFund: {
+                    name: 'Mutual Fund (SIP)',
+                    rate: state.altMutualFundRate,
+                    totalInvested: totalPremiumNet,
+                    cashbacks: totalCashback,
+                    maturity: mfBal,
+                    irr: state.altMutualFundRate,
+                    track: mfTrack
+                },
+                safeBond: {
+                    name: 'Govt Bonds / PPF',
+                    rate: state.altSafeBondRate,
+                    totalInvested: totalPremiumNet,
+                    cashbacks: totalCashback,
+                    maturity: bondBal,
+                    irr: state.altSafeBondRate,
+                    track: bondTrack
+                },
+                fixedDeposit: {
+                    name: 'Thai Fixed Deposit',
+                    rate: netFdRate,
+                    totalInvested: totalPremiumNet,
+                    cashbacks: totalCashback,
+                    maturity: fdBal,
+                    irr: netFdRate,
+                    track: fdTrack
+                },
+                insurance: {
+                    name: 'Life Savings Insurance',
+                    rate: irrInsurance || 0,
+                    totalInvested: totalPremiumNet,
+                    cashbacks: totalCashback,
+                    maturity: totalMaturity,
+                    irr: irrInsurance || 0,
+                    track: insTrack
+                }
+            };
+        }
+
+        // Inject computed comparison data rows into matrix table
+        function renderComparisonTable(outputs) {
+            const body = document.getElementById('comparison-body');
+            body.innerHTML = '';
+
+            const items = [outputs.insurance, outputs.mutualFund, outputs.safeBond, outputs.fixedDeposit];
+            const dots = ['dot-insurance', 'dot-mutual', 'dot-ppf', 'dot-fd'];
+
+            items.forEach((item, idx) => {
+                const tr = document.createElement('tr');
+                
+                const yieldFormatted = (item.rate * 100).toFixed(2) + '%';
+                const irrFormatted = item.irr !== null ? (item.irr * 100).toFixed(2) + '%' : 'N/A';
+
+                tr.innerHTML = `
+                    <td>
+                        <div class="comparison-row-title">
+                            <span class="comparison-dot ${dots[idx]}"></span>
+                            <strong>${item.name}</strong>
+                        </div>
+                    </td>
+                    <td>${yieldFormatted} ${idx === 3 ? '<span style="font-size:0.7rem; color:var(--text-muted);">(Net)</span>' : ''}</td>
+                    <td>${formatNumber(item.totalInvested)} THB</td>
+                    <td>${formatNumber(item.cashbacks)} THB</td>
+                    <td style="font-weight:600; color: #ffffff;">${formatNumber(item.maturity)} THB</td>
+                    <td style="font-weight:700; color: ${idx === 0 ? 'var(--accent-cyan)' : 'var(--text-primary)'};">${irrFormatted}</td>
+                `;
+                body.appendChild(tr);
+            });
+        }
+
+        // Switch Chart tab
+        function switchChart(tabKey) {
+            state.activeChartTab = tabKey;
+            
+            document.getElementById('tab-wealth').classList.remove('active');
+            document.getElementById('tab-cashflow').classList.remove('active');
+            
+            document.getElementById(`tab-${tabKey}`).classList.add('active');
+            
+            // Re-evaluate to render correctly
+            pullInputsToState();
+            evaluateCalculationsAndCharts();
+        }
+
+        // Render dynamic neon canvas charts
+        function renderChart(outputs) {
+            const ctx = document.getElementById('analysisChart').getContext('2d');
+            
+            if (activeChart) {
+                activeChart.destroy();
+            }
+
+            const labelArray = Array.from({length: state.policyTerm}, (_, i) => `Year ${i + 1}`);
+
+            if (state.activeChartTab === 'wealth') {
+                // Multi-line Cumulative Wealth Charts
+                activeChart = new Chart(ctx, {
+                    type: 'line',
+                    data: {
+                        labels: ['Start', ...labelArray],
+                        datasets: [
+                            {
+                                label: 'Life Savings Insurance',
+                                data: outputs.insurance.track,
+                                borderColor: '#06b6d4',
+                                borderWith: 3,
+                                backgroundColor: 'transparent',
+                                tension: 0.35,
+                                fill: false,
+                                pointRadius: 2
+                            },
+                            {
+                                label: 'Mutual Funds (SIP Alternative)',
+                                data: outputs.mutualFund.track,
+                                borderColor: '#6366f1',
+                                borderWith: 3,
+                                backgroundColor: 'transparent',
+                                tension: 0.35,
+                                fill: false,
+                                pointRadius: 2
+                            },
+                            {
+                                label: 'Safe Government Bonds',
+                                data: outputs.safeBond.track,
+                                borderColor: '#10b981',
+                                borderWith: 2,
+                                backgroundColor: 'transparent',
+                                tension: 0.35,
+                                fill: false,
+                                pointRadius: 1
+                            },
+                            {
+                                label: 'Fixed Deposits (Post-tax)',
+                                data: outputs.fixedDeposit.track,
+                                borderColor: '#eab308',
+                                borderWith: 2,
+                                backgroundColor: 'transparent',
+                                tension: 0.35,
+                                fill: false,
+                                pointRadius: 1
+                            }
+                        ]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: {
+                                labels: {
+                                    color: '#94a3b8',
+                                    font: { family: 'Inter', size: 11 }
+                                }
+                            },
+                            tooltip: {
+                                backgroundColor: '#0d132a',
+                                borderColor: 'rgba(255, 255, 255, 0.08)',
+                                borderWidth: 1,
+                                titleFont: { family: 'Outfit', size: 12 },
+                                bodyFont: { family: 'Inter', size: 11 },
+                                callbacks: {
+                                    label: function(context) {
+                                        return ` ${context.dataset.label}: ${formatNumber(context.raw.toFixed(0))} THB`;
+                                    }
+                                }
+                            }
+                        },
+                        scales: {
+                            x: {
+                                grid: { color: 'rgba(255, 255, 255, 0.03)' },
+                                ticks: { color: '#64748b', font: { family: 'Inter', size: 10 } }
+                            },
+                            y: {
+                                grid: { color: 'rgba(255, 255, 255, 0.03)' },
+                                ticks: { color: '#64748b', font: { family: 'Inter', size: 10 } }
+                            }
+                        }
+                    }
+                });
+            } else {
+                // Inflow/Outflow Bar Charts
+                const outflows = [];
+                const inflows = [];
+
+                state.timeline.forEach(row => {
+                    outflows.push(row.premium - row.taxSavings);
+                    inflows.push(row.cashback + row.maturity);
+                });
+
+                activeChart = new Chart(ctx, {
+                    type: 'bar',
+                    data: {
+                        labels: labelArray,
+                        datasets: [
+                            {
+                                label: 'Net Premium Outflow',
+                                data: outflows,
+                                backgroundColor: 'rgba(244, 63, 94, 0.55)',
+                                borderColor: 'rgba(244, 63, 94, 0.8)',
+                                borderWidth: 1,
+                                borderRadius: 4
+                            },
+                            {
+                                label: 'Total Benefit Inflow',
+                                data: inflows,
+                                backgroundColor: 'rgba(16, 185, 129, 0.55)',
+                                borderColor: 'rgba(16, 185, 129, 0.8)',
+                                borderWidth: 1,
+                                borderRadius: 4
+                            }
+                        ]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: {
+                                labels: {
+                                    color: '#94a3b8',
+                                    font: { family: 'Inter', size: 11 }
+                                }
+                            },
+                            tooltip: {
+                                backgroundColor: '#0d132a',
+                                borderColor: 'rgba(255, 255, 255, 0.08)',
+                                borderWidth: 1,
+                                callbacks: {
+                                    label: function(context) {
+                                        return ` ${context.dataset.label}: ${formatNumber(context.raw)} THB`;
+                                    }
+                                }
+                            }
+                        },
+                        scales: {
+                            x: {
+                                grid: { display: false },
+                                ticks: { color: '#64748b', font: { family: 'Inter', size: 10 } }
+                            },
+                            y: {
+                                grid: { color: 'rgba(255, 255, 255, 0.03)' },
+                                ticks: { color: '#64748b', font: { family: 'Inter', size: 10 } }
+                            }
+                        }
+                    }
+                });
+            }
+        }
+
+        // Format Helper: Adds commas and decimals
+        // We round to integers for standard neat presentation of financial assets
+        function formatNumber(num) {
+            return Number(num).toLocaleString('en-US', {
+                minimumFractionDigits: 0,
+                maximumFractionDigits: 0
+            });
+        }
+    </script>
+</body>
+</html>
